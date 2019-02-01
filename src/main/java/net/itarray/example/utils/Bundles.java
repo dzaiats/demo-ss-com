@@ -13,7 +13,8 @@ public class Bundles {
     }
 
     public static String getString(String bundleName) {
-        return String.valueOf(bundles.get(String.class.hashCode() * bundleName.hashCode()).bundleValue);
+        Bundle b = bundles.get(String.class.hashCode() * bundleName.hashCode());
+        return b != null ? String.valueOf(b.bundleValue) : null;
     }
 
     public static void putInt(String bundleName, int bundleValue) {
@@ -22,7 +23,18 @@ public class Bundles {
     }
 
     public static Integer getInt(String bundleName) {
-        return (Integer) bundles.get(String.class.hashCode() * bundleName.hashCode()).bundleValue;
+        Bundle b = bundles.get(Integer.class.hashCode() * bundleName.hashCode());
+        return b != null ? (Integer) b.bundleValue : 0;
+    }
+
+    public static void putObjectOfType(Object o, String bundleName, Object bundleValue) {
+        Bundle bundle = new Bundle(o, bundleName, bundleValue);
+        bundles.put(bundle.hashCode(), bundle);
+    }
+
+    public static Object getObjectOfType(Object o, String bundleName) {
+        Bundle b = bundles.get(o.hashCode() * bundleName.hashCode());
+        return b != null ? b.bundleValue : 0;
     }
 
     private static class Bundle {

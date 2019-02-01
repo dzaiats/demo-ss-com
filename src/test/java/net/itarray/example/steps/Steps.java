@@ -1,26 +1,21 @@
 package net.itarray.example.steps;
 
+import cucumber.api.Scenario;
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
-import net.itarray.example.driver.DriverProvider;
-import net.itarray.example.pages.*;
+import net.itarray.automotion.validation.ResponsiveUIValidator;
+import net.itarray.example.pages.HomePage;
+import net.itarray.example.utils.Bundles;
 import org.assertj.core.api.SoftAssertions;
-import org.openqa.selenium.WebDriver;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
-public class Steps {
-    private static SoftAssertions softAssertions;
-    private static WebDriver driver;
-    private static HomePage homePage;
-    private static MemoPage memoPage;
-    private static SubCategoriesPage subCategoriesPage;
-    private static CategoryPage categoryPage;
-    private static ListingPage listingPage;
+import static org.junit.Assert.assertTrue;
+
+public class Steps extends StepsInitializer {
 
     @Before
     public void beforeScenario() {
@@ -28,25 +23,29 @@ public class Steps {
     }
 
     @After
-    public void afterScenario() {
-        softAssertions.assertAll();
+    public void afterScenario(Scenario s) {
+        ResponsiveUIValidator uiValidator = (ResponsiveUIValidator) Bundles.getObjectOfType(ResponsiveUIValidator.class, "ResponsiveUIValidator");
+        uiValidator.generateReport();
+
+        if (s.isFailed()) {
+            takeScreenshot(s);
+        }
+
+        assertTrue(softAssertions.errorsCollected().toString(), softAssertions.errorsCollected().isEmpty());
     }
 
     @Given("^open browser$")
     public void open_browser() throws IOException {
-        driver = DriverProvider.getDriver();
-        driver.manage().deleteAllCookies();
-        driver.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
-        driver.manage().timeouts().setScriptTimeout(30, TimeUnit.SECONDS);
-        driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+        startDriver();
+        ResponsiveUIValidator responsiveUIValidator = new ResponsiveUIValidator(driver);
+        responsiveUIValidator.withTolerance(5);
+
+        Bundles.putObjectOfType(ResponsiveUIValidator.class, "ResponsiveUIValidator", responsiveUIValidator);
     }
 
     @Given("^close browser$")
     public void close_browser() {
-        if (driver != null) {
-            driver.quit();
-            driver = null;
-        }
+        closeDriver();
     }
 
     @When("^open the home page with language '(.+)'$")
@@ -55,25 +54,12 @@ public class Steps {
         homePage = new HomePage(driver);
     }
 
-    @When("^select the random category$")
+    @When("^select the random listing$")
     public void select_the_random_category() {
-        subCategoriesPage = homePage.selectRandomCategory();
-        if (subCategoriesPage instanceof CategoryPage) {
-            categoryPage = (CategoryPage) subCategoriesPage;
-        }
+        listingPage = homePage.selectRandomListing();
     }
 
-    @Then("^select the random sub-category$")
-    public void select_the_random_sub_category() {
-        categoryPage = subCategoriesPage.selectRandomCategory();
-    }
-
-    @Then("^select the random listing$")
-    public void select_the_random_listing() {
-        listingPage = categoryPage.selectRandomListing();
-    }
-
-    @Then("^the listing page is displayed$")
+    @Then("^the listing page is displayed correctly$")
     public void the_listing_page_is_displayed() {
         listingPage.validate(softAssertions);
     }
@@ -90,27 +76,7 @@ public class Steps {
 
     @Then("^the listing is added to favourites$")
     public void the_listing_is_added_to_favourites() {
-        homePage.validateThatListingIsAdded(softAssertions);
-    }
-
-    @Then("^navigate to Memo page$")
-    public void navigate_to_Memo_page() {
-        memoPage = homePage.openMemomPage();
-    }
-
-    @Then("^select the random listing from the table$")
-    public void select_the_random_listing_from_the_table() {
-        memoPage.selectRandomListingFromTable();
-    }
-
-    @Then("^select Remove from favourites$")
-    public void select_Remove_from_favourites() {
-        memoPage.selectRemoveFromFavorites();
-    }
-
-    @Then("^the listing is removed from the table$")
-    public void the_listing_is_removed_from_the_table() {
-        memoPage.validateThatListingIsRemoved(softAssertions);
+        listingPage.validateThatListingIsAdded(softAssertions);
     }
 
 }

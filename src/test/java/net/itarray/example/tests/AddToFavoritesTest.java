@@ -8,5 +8,5 @@ import org.junit.runner.RunWith;
 @CucumberOptions(format = {"html:target/site/cucumber-pretty", "json:target/cucumberJson/cucumber.json"},
         glue = {"net/itarray/example/steps"},
         features = {"src/test/resources/features"})
-public class FireInTheHoleTest {
+public class AddToFavoritesTest {
 }

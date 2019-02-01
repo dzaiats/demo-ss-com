@@ -51,6 +51,11 @@
             <artifactId>assertj-core</artifactId>
             <version>3.11.1</version>
         </dependency>
+        <dependency>
+            <groupId>net.itarray</groupId>
+            <artifactId>automotion</artifactId>
+            <version>2.2.0</version>
+        </dependency>
     </dependencies>
 
 </project>
